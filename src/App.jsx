@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ShoppingCart, Flame, ShieldCheck, Truck } from 'lucide-react';
+// 1. اضافة الأيقونات الجديدة : CreditCard, Banknote, ArrowRight
+import { ShoppingCart, Flame, ShieldCheck, Truck, CreditCard, Banknote, ArrowRight } from 'lucide-react';
 
 import photo1 from './image/photo_1_2026-06-17_22-21-18.jpg';
 import photo2 from './image/photo_2_2026-06-17_22-21-18.jpg';
@@ -41,10 +42,27 @@ const products = [
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(products[0].name);
   const [size, setSize] = useState('L');
+  // الـ state الجديدة لاختيار اللون
+  const [color, setColor] = useState('black'); // black أو white
+
+  // 2. الـ States الجديدة للتحكم في خطوات الدفع والنجاح
+  const [formStep, setFormStep] = useState(1); // 1: البيانات، 2: طرق الدفع، 3: تم النجاح
+  const [paymentMethod, setPaymentMethod] = useState('cash'); // cash أو card
 
   const scrollToOrder = (productName) => {
     if (productName) setSelectedProduct(productName);
     document.getElementById('order-form').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ينقله لخطوة اختيار الدفع بعد التأكد من صحة البيانات
+  const handleNextStep = (e) => {
+    e.preventDefault();
+    setFormStep(2);
+  };
+
+  // ينقله لشاشة النجاح النهائية
+  const handleFinalSubmit = () => {
+    setFormStep(3);
   };
 
   return (
@@ -91,7 +109,7 @@ export default function App() {
 
           <div className="relative mx-auto lg:ml-0 max-w-md lg:max-w-none w-full">
             <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 to-transparent rounded-3xl blur-2xl"></div>
-              <img 
+            <img 
               src={photo2}
               alt="Mitsubishi Evo T-shirt" 
               className="rounded-2xl border border-zinc-800 shadow-2xl bg-zinc-900 transform hover:scale-[1.02] transition duration-300"
@@ -179,64 +197,186 @@ export default function App() {
       {/* Order Form Section */}
       <section id="order-form" className="py-20 bg-zinc-900/40 border-t border-zinc-900">
         <div className="max-w-xl mx-auto px-4">
-          <div className="bg-zinc-900 rounded-3xl p-6 sm:p-10 border border-zinc-800 shadow-2xl space-y-6">
+          <div className="bg-zinc-900 rounded-3xl p-6 sm:p-10 border border-zinc-800 shadow-2xl min-h-[400px] flex flex-col justify-center">
             
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black">أكّد طلبك الآن 📦</h2>
-              <p className="text-zinc-400 text-sm">املأ البيانات وهيتم التواصل معاك وتجهيز الشحن فوراً دليفري للمنزل.</p>
-            </div>
-
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1.5">الاسم بالكامل</label>
-                <input type="text" placeholder="الاسم" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1.5">رقم الموبايل (مهم جداً)</label>
-                <input type="tel" placeholder=" XXXXXXXX" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1.5">العنوان بالتفصيل (المحافظة / المنطقة)</label>
-                <input type="text" placeholder=" القاهرة، مصر الجديدة، شارع..." className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">الموديل المطلوب</label>
-                  <select 
-                    value={selectedProduct} 
-                    onChange={(e) => setSelectedProduct(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-3 text-zinc-100 focus:outline-none focus:border-red-600 transition"
-                  >
-                    {products.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
-                  </select>
+            {/* Step 1: Data Input Form */}
+            {formStep === 1 && (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-black">أكّد طلبك الآن 📦</h2>
+                  <p className="text-zinc-400 text-sm">املأ البيانات وهيتم التواصل معاك وتجهيز الشحن فوراً دليفري للمنزل.</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">المقاس</label>
-                  <div className="flex gap-2">
-                    {['M', 'L', 'XL', 'XXL'].map((m) => (
-                      <button 
-                        key={m}
-                        type="button"
-                        onClick={() => setSize(m)}
-                        className={`flex-1 py-3 text-sm font-bold rounded-xl border transition ${size === m ? 'bg-red-600 border-red-600 text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'}`}
+
+                <form className="space-y-4" onSubmit={handleNextStep}>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">الاسم بالكامل</label>
+                    <input type="text" placeholder="الاسم" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">رقم الموبايل (مهم جداً)</label>
+                    <input type="tel" placeholder=" XXXXXXXX" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">العنوان بالتفصيل (المحافظة / المنطقة)</label>
+                    <input type="text" placeholder=" القاهرة، مصر الجديدة، شارع..." className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-600 transition" required />
+                  </div>
+
+                  {/*Modify the checkboxes to support model, size, and color. */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1.5">الموديل المطلوب</label>
+                      <select 
+                        value={selectedProduct} 
+                        onChange={(e) => setSelectedProduct(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-3 text-zinc-100 focus:outline-none focus:border-red-600 transition"
                       >
-                        {m}
-                      </button>
-                    ))}
+                        {products.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1.5">المقاس</label>
+                        <div className="flex gap-1">
+                          {['M', 'L', 'XL', 'XXL'].map((m) => (
+                            <button 
+                              key={m}
+                              type="button"
+                              onClick={() => setSize(m)}
+                              className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl border transition ${size === m ? 'bg-red-600 border-red-600 text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'}`}
+                            >
+                              {m}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1.5">اللون</label>
+                        <div className="flex gap-2">
+                          {[
+                            { id: 'black', name: 'أسود' },
+                            { id: 'white', name: 'أبيض' }
+                          ].map((c) => (
+                            <button 
+                              key={c.id}
+                              type="button"
+                              onClick={() => setColor(c.id)}
+                              className={`flex-1 py-3 text-sm font-bold rounded-xl border transition ${color === c.id ? 'bg-red-600 border-red-600 text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'}`}
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 rounded-xl transition transform hover:scale-[1.01] shadow-lg shadow-red-900/20 mt-4 flex items-center justify-center gap-2"
+                  >
+                    تأكيد وتحديد طريقة الدفع <ArrowRight className="w-5 h-5 rotate-180" />
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* Step 2: Payment Method Cards */}
+            {formStep === 2 && (
+              <div className="space-y-6">
+                <button 
+                  onClick={() => setFormStep(1)}
+                  className="text-zinc-500 hover:text-zinc-300 text-xs flex items-center gap-1 transition"
+                >
+                  <ArrowRight className="w-4 h-4" /> العودة لتعديل البيانات
+                </button>
+
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-black">اختر طريقة الدفع المناسبة لِك 💳</h2>
+                  <p className="text-zinc-400 text-sm">جميع الخيارات تضمن حقك في معاينة وقياس المنتج قبل الدفع.</p>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  {/* Cash on Delivery */}
+                  <div 
+                    onClick={() => setPaymentMethod('cash')}
+                    className={`p-5 rounded-2xl border-2 cursor-pointer transition flex items-center justify-between ${paymentMethod === 'cash' ? 'border-red-600 bg-red-950/20' : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${paymentMethod === 'cash' ? 'bg-red-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
+                        <Banknote className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base">الدفع نقداً (كاش) عند الاستلام</h4>
+                        <p className="text-zinc-400 text-xs mt-0.5">الدفع للمندوب يد بيد بعد فتح الشحنة والتأكد منها.</p>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-red-600' : 'border-zinc-700'}`}>
+                      {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 rounded-full bg-red-600"></div>}
+                    </div>
+                  </div>
+
+                  {/* Visa card*/}
+                  <div 
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-5 rounded-2xl border-2 cursor-pointer transition flex items-center justify-between ${paymentMethod === 'card' ? 'border-red-600 bg-red-950/20' : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${paymentMethod === 'card' ? 'bg-red-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
+                        <CreditCard className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base">الدفع بالفيزا / كارت البنك عند الاستلام</h4>
+                        <p className="text-zinc-400 text-xs mt-0.5">المندوب هيجيب معاه ماكينة الدفع (POS) وتقدر تدفع بـ كارتك براحتك.</p>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'card' ? 'border-red-600' : 'border-zinc-700'}`}>
+                      {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-red-600"></div>}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <button 
-                type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 rounded-xl transition transform hover:scale-[1.01] shadow-lg shadow-red-900/20 mt-4 flex items-center justify-center gap-2"
-              >
-                تأكيد الطلب والدفع عند الاستلام 🏎️
-              </button>
-            </form>
+                <button 
+                  onClick={handleFinalSubmit}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-lg py-4 rounded-xl transition transform hover:scale-[1.01] shadow-lg shadow-red-900/20 mt-4"
+                >
+                  إتمام الطلب النهائي لشراء لَون {color === 'black' ? 'أسود' : 'أبيض'} مقاس {size} 🏎️
+                </button>
+              </div>
+            )}
+
+            {/* Step 3: Success Screen */}
+            {formStep === 3 && (
+              <div className="text-center space-y-6 py-6 animate-scaleUp">
+                <div className="w-20 h-20 bg-zinc-950 text-green-500 border border-zinc-800 rounded-full flex items-center justify-center mx-auto shadow-xl">
+                  <Truck className="w-12 h-12" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-black text-white">تم استلام طلبك بنجاح! 🔥</h2>
+                  <p className="text-zinc-400 text-sm max-w-sm mx-auto">
+                    جاهز لتجهيز وحشك! هيتم التواصل معاك مكالمة هاتفية أو واتساب خلال 24 ساعة لتأكيد الشحن فوراً للمنزل.
+                  </p>
+                </div>
+                <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800 text-xs flex flex-col gap-2 items-center text-zinc-400 max-w-xs mx-auto">
+                  <div>الطلب الحالي: <span className="text-white font-bold">{selectedProduct}</span></div>
+                  <div>المواصفات: <span className="text-red-500 font-bold">مقاس {size} - لون {color === 'black' ? 'أسود' : 'أبيض'}</span></div>
+                  <div className="border-t border-zinc-800/80 pt-2 w-full mt-1">
+                    طريقة الدفع: <span className="text-red-500 font-bold">{paymentMethod === 'cash' ? 'كاش عند الاستلام' : 'بالفيزا مع المندوب'}</span>
+                  </div>
+                </div>
+                <div>
+                  <button 
+                    onClick={() => setFormStep(1)}
+                    className="text-zinc-500 hover:text-red-500 font-medium text-sm transition underline underline-offset-4"
+                  >
+                    عمل طلب جديد
+                  </button>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
